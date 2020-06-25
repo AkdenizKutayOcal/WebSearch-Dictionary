@@ -1,3 +1,9 @@
+/*
+Author: Akdeniz Kutay Ocal
+Title: Task2 
+Description: Sequential Execution - One Query at a Time
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +19,8 @@
 // the first ascii char is 032 which is whitespace
 #define CHAR_TO_INDEX(c) ((int)c - (int)' ')
 
+#define MAX_LINE_LENGTH 1000
+
 // Trie node
 struct TrieNode
 {
@@ -21,6 +29,63 @@ struct TrieNode
     bool isEndOfWord; // if the node represents end of a word
     int frequency;    // number of times a query occured
 };
+
+struct TrieNode *getNode();
+void insert();
+bool search();
+bool isLeafNode();
+void printTrie();
+
+int main()
+{
+
+    clock_t begin = clock();
+
+    char dataFiles[10][12] = {"data/data1", "data/data2",
+                              "data/data3", "data/data4", "data/data5", "data/data6",
+                              "data/data7", "data/data8", "data/data9", "data/data10"};
+
+    unsigned char *line;
+    line = (char *)malloc(sizeof(char) * MAX_LINE_LENGTH);
+
+    struct TrieNode *root = getNode();
+
+    int fileIndex = 0;
+
+    FILE *fp;
+    FILE *output;
+
+    output = fopen("dictTask2.txt", "w");
+
+    for (fileIndex; fileIndex < 10; fileIndex++)
+    {
+        fp = fopen(dataFiles[fileIndex], "r+");
+  
+        if (fp == NULL)
+        {
+            printf("Failed to open the file %s\n", *(dataFiles + fileIndex));
+            break;
+        }
+
+        while (fgets(line, MAX_LINE_LENGTH, fp) != NULL)
+        {
+            line[strlen(line) - 1] = '\0';
+            insert(root, line);
+        }
+
+        fclose(fp);
+    }
+
+    unsigned char *str;
+    str = (unsigned char *)malloc(sizeof(char) * MAX_LINE_LENGTH);
+    printTrie(root, str, 0, output);
+    fclose(output);
+
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Task2 took %f seconds to execute.\n", time_spent);
+}
+
 
 // Returns new trie node (initialized to NULLs)
 struct TrieNode *getNode(void)
@@ -34,6 +99,7 @@ struct TrieNode *getNode(void)
         int i;
 
         pNode->isEndOfWord = false;
+        pNode->frequency = 0;
 
         for (i = 0; i < ALPHABET_SIZE; i++)
             pNode->children[i] = NULL;
@@ -113,55 +179,4 @@ void printTrie(struct TrieNode *root, unsigned char *str, int level, FILE *outpu
             printTrie(root->children[i], str, level + 1, output);
         }
     }
-}
-
-int main()
-{
-
-    clock_t begin = clock();
-
-    char dataFiles[10][12] = {"data1", "data2", "data3", "data4", "data5", "data6", "data7", "data8", "data9", "data10"};
-    unsigned char *line;
-    line = (char *)malloc(sizeof(char) * 1000);
-
-    struct TrieNode *root = getNode();
-
-    int fileIndex = 0;
-    int lineCount = 0;
-
-    FILE *fp;
-    FILE *output;
-
-    output = fopen("dictionary1.txt", "w");
-
-    for (fileIndex; fileIndex < 10; fileIndex++)
-    {
-        fp = fopen(dataFiles[fileIndex], "r+");
-        lineCount = 0;
-
-        if (fp == NULL)
-        {
-            printf("Failed to open the file %s\n", *(dataFiles + fileIndex));
-            break;
-        }
-
-        while (fgets(line, 1000, fp) != NULL)
-        {
-            line[strlen(line) - 1] = '\0';
-            insert(root, line);
-            lineCount++;
-        }
-
-        printf("%s count = %d\n", *(dataFiles + fileIndex), lineCount);
-        fclose(fp);
-    }
-
-    unsigned char *str;
-    str = (unsigned char *)malloc(sizeof(char) * 1000);
-    printTrie(root, str, 0, output);
-    fclose(output);
-
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Task2 took %f seconds to execute.\n",time_spent);
 }

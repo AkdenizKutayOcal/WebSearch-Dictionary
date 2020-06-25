@@ -1,7 +1,17 @@
+/*
+Author: Akdeniz Kutay Ocal
+Title: Task1 
+Description: Trie Data Structure. The code is taken from
+GeeksForGeeks Website and modified for out case.
+Source: https://www.geeksforgeeks.org/trie-insert-and-search/
+
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
@@ -33,6 +43,7 @@ struct TrieNode *getNode(void)
         int i;
 
         pNode->isEndOfWord = false;
+        pNode->frequency = 0;
 
         for (i = 0; i < ALPHABET_SIZE; i++)
             pNode->children[i] = NULL;
@@ -45,6 +56,8 @@ struct TrieNode *getNode(void)
 // If the key is prefix of trie node, just marks leaf node
 void insert(struct TrieNode *root, unsigned char *key)
 {
+
+    //printf("%s\n",key);
     int level;
     int length = strlen(key);
     int index;
@@ -87,14 +100,10 @@ bool search(struct TrieNode *root, unsigned char *key)
     return (pCrawl != NULL && pCrawl->isEndOfWord);
 }
 
+// function to check if current node is leaf node or not
 bool isLeafNode(struct TrieNode *root)
 {
-
-    if (root->isEndOfWord)
-        return true;
-
-    else
-        return false;
+    return root->isEndOfWord != false;
 }
 
 void printTrie(struct TrieNode *root, unsigned char *str, int level, FILE *output)
@@ -102,14 +111,12 @@ void printTrie(struct TrieNode *root, unsigned char *str, int level, FILE *outpu
 
     if (isLeafNode(root))
     {
-
         str[level] = '\0';
         fprintf(output, "%s\t%d\n", str, root->frequency);
     }
 
     for (int i = 0; i < ALPHABET_SIZE; i++)
     {
-
         if (root->children[i])
         {
             str[level] = i + ' ';
